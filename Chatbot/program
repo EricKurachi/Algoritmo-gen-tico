@@ -1,0 +1,39 @@
+import time
+import chatbot_funcoes
+
+def header():
+    print('-------------------------')
+    print('     Chatbot Amadeus')
+    print('-------------------------')
+    print()
+
+def salutation():
+    if time.localtime().tm_hour < 6:
+        print("o que você está fazendo acordado a essa hora? O que quer fazer?")
+    elif time.localtime().tm_hour < 12:
+        print("Bom dia! Meu nome é Amadeus e estou a seu dispor. O que quer fazer?")
+    elif time.localtime().tm_hour < 19:
+        print("Boa Tarde! Meu nome é Amadeus e estou a seu dispor. O que quer fazer?")
+    else:
+        print("Boa Noite! Meu nome é Amadeus e estou a seu dispor. O que quer fazer?")
+
+def main():
+    header()
+    salutation()
+    cmd = "Inicial"
+
+    while cmd != 's':
+        cmd = input("[c]onversar, [b]usca na wikipedia ou [s]air ")
+        if cmd == 'c':
+            chatbot_funcoes.conversar()
+        elif cmd == 'b':
+            pesquisa = input("Digite o que quer pesquisar: ")
+            print (chatbot_funcoes.search_wikipedia(pesquisa))
+        elif cmd == 's':
+            print ('Até a próxima!')
+        else:
+            print('Me desculpe, mas esse comando não existe')
+
+
+if (__name__ == "__main__"):
+    main()
