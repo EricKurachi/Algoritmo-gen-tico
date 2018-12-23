@@ -1,0 +1,102 @@
+import random
+import math
+from heapq import nsmallest
+from copy import deepcopy
+
+def generate_cromossome(beam_number):
+    ''' cria um cromossomo escolhendo aletoriamente os ângulos
+    '''
+    cromossome = []
+
+    for j in range(0, beam_number):
+        angle = random.randint(0, 360)
+        cromossome.append(angle)
+
+    return cromossome
+
+def first_generation(generation_size, beam_number):
+    '''cria uma geracao do tamanho desejado criando o numero pedido de cromossomos
+    '''
+
+    generation = []
+
+    for i in range(0, generation_size):
+        cromossome = generate_cromossome(beam_number)
+        generation.append(cromossome)
+    return generation
+
+def mutation(generation, generation_size, beam_number):
+    for i in range(generation_size):
+        position = random.randint(0, beam_number-1)
+        value = random.randint(0, 360)
+        generation[i][position] = value
+
+    return generation
+
+def crossover(mutated, generation_size, beam_number):
+    '''realiza o crossover escolhendo alguns angulos para trocarem entre cromossomos
+    '''
+    for i in range(0, generation_size, 2):
+        for j in range(0, beam_number):
+            change = random.randint(1, 2)
+            if change == 1:
+                holder = mutated[i+1][j]
+                mutated[i+1][j] = mutated[i][j]
+                mutated[i][j] = holder
+
+    return mutated
+
+def new_generation(generation, generation_size, beam_number):
+    '''cria uma geracao mutando e cruzando a anterior
+    '''
+    gen = deepcopy(generation)
+    random.shuffle(gen)
+    mutated = mutation(gen, generation_size, beam_number)
+    crossed = crossover(mutated, generation_size, beam_number)
+    return crossed
+
+def total_interference(cromossome, beam_number, distance):
+    total = 0
+    for i in range(0, beam_number):
+        for j in range(i+1, beam_number - 1):
+            total += math.cos(math.radians((int(cromossome[i])-int(cromossome[j]))/((distance*(int(j) - int(i)))**2)))
+    return total
+
+def best_cromossomes(group, generation_size, beam_number, distance):
+    interference = []
+    best = []
+    for i in range(0, len(group)):
+        interference.append(total_interference(group[i], beam_number, distance))
+    values = nsmallest(generation_size, interference)
+    for j in group:
+        try:
+            ind = values.index(total_interference(j, beam_number, distance))
+            best.append(j)
+            del values[ind]
+
+        except ValueError:
+            "Do nothing"
+    return best
+
+def main():
+    distance = 1
+    generation_size = 5*2
+    beam_number = 20
+
+    generation = first_generation(generation_size, beam_number)
+    for i in range(generation_size):
+        print(total_interference(generation[i], beam_number, distance))
+    print('-------------')
+
+    for i in range(0, 1000):
+        new = new_generation(generation, generation_size, beam_number)
+        group = new + generation
+        generation = best_cromossomes(group, generation_size, beam_number, distance)
+
+    print('-------------')
+    print(generation)
+    for i in range(generation_size):
+        print(total_interference(generation[i], beam_number, distance))
+
+if (__name__ == "__main__"):
+    main()
